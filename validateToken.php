@@ -1,14 +1,16 @@
 <?php 
 require ("src/JWT.php");
 
-$token = $_POST["token"];
+if(isset($_POST)) {
+  $token = $_POST["token"];
+}
 
 $result = JWT::validate($token);
 
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +23,9 @@ $result = JWT::validate($token);
     <input id="token" type="text" name="token">
     <input type="submit" value="Validar">
   </form>
+  <?php if(!empty($result)) { ?>
+    <p>Token: <?= $result ?></p>
+  <?php } ?>
   
 </body>
 </html>

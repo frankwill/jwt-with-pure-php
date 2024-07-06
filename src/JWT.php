@@ -32,32 +32,23 @@ class JWT
   public static function validate(string $token)
   {
     $arrayParts = explode(".", $token);
-    
-    // if (count($arrayParts) != 3) {
-    //   echo "Token inválido";
-    //   exit();
-    // }
 
-    // $decode = json_decode(base64_decode($arrayParts[1]), true);
+    $header = $arrayParts[0];
+    $payload = $arrayParts[1];
+    $signature = $arrayParts[2];
 
-    // if ($decode["exp"] < time()) {
-    //   echo "sim";
-    // } else {
-    //   echo "nao";
-    // }
-    // exit();
+    $decode = json_decode(base64_decode($payload), true);
 
-    // $header = $arrayParts[0];
-    // $payload = $arrayParts[1];
-    // $signature = $arrayParts[2];
+    $valid = hash_hmac("sha256", "$header.$payload", "senha-secreta", true);
 
-    // $valid = hash_hmac('sha256', "$header.$payload", 'senha-secreta', true);
-    // $valid = self::base64Encode($valid);
-
-    // if ($signature == $valid) {
-    //   return $token = "$header.$payload.$signature";
-    // } else {
-    //   return false;
-    // }
+    if(count($arrayParts) != 3) {
+      return "Inválido";
+    } else if($decode["exp"] < time()) {
+      return "Expirado";
+    } else if ($signature == $valid) {
+      return "Permissão negada";
+    } else {
+      return "$header.$payload.$signature";
+    }
   }
 }
