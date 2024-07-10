@@ -1,12 +1,10 @@
 <?php 
 require ("src/JWT.php");
 
-if(isset($_POST)) {
+if(isset($_POST['token']) ) {
   $token = $_POST["token"];
+  $result = JWT::validate($token);
 }
-
-$result = JWT::validate($token);
-
 ?>
 
 <!DOCTYPE html>
