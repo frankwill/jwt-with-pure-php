@@ -1,9 +1,11 @@
 <?php 
 require ("src/JWT.php");
 
+
+$key = "exemplo_de_chave";
 if(isset($_POST['token']) ) {
   $token = $_POST["token"];
-  $result = JWT::validate($token);
+  $result = JWT::validate($token, $key);
 }
 ?>
 
