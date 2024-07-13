@@ -2,11 +2,24 @@
 
 require('src/JWT.php');
 
-$username = filter_input(INPUT_POST, 'username');
+var_dump($_POST);
+exit();
 
-$key = "exemplo_de_chave";
-$payload = ["username" => $username];
+$name = filter_input(INPUT_POST, 'name');
+$company = filter_input(INPUT_POST, 'company');
+$secret = filter_input(INPUT_POST, 'secret');
 
-$token = JWT::encode($payload, $key);
+$payload = [
+  "name" => $name,
+  "company" => $company,
+];
 
-return $token;
+$token = JWT::encode($payload, $secret);
+
+$response = [
+  "payload" => $payload,
+  "token" => $token
+];
+
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode($response);
