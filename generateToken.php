@@ -2,9 +2,6 @@
 
 require('src/JWT.php');
 
-var_dump($_POST);
-exit();
-
 $name = filter_input(INPUT_POST, 'name');
 $company = filter_input(INPUT_POST, 'company');
 $secret = filter_input(INPUT_POST, 'secret');

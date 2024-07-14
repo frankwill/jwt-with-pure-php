@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <div id="show-alert" class="row py-4 justify-content-center align-items-center">
+    <div id="show-alert-generate-token" class="row pt-4 justify-content-center align-items-center d-none">
       <div class="col-8">
         <div class="alert alert-success" role="alert">
           <h4 class="alert-heading">Token gerado!</h4>
@@ -62,6 +62,19 @@
         </div>
       </div>
     </div>
+
+    <div class="row mt-3 justify-content-center align-items-center">
+      <div class="col-8 m-0">
+        <form id="form-validate-token" method="POST">
+          <div class="mb-4">
+            <label for="token" class="form-label">Token</label>
+            <input type="text" class="form-control" id="token" name="token" placeholder="Digite seu token" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Validar Token</button>
+        </form>
+      </div>
+
+    </div>
   </main>
 
 
@@ -69,27 +82,42 @@
 
   <script>
     const formPayload = document.getElementById("form-generate-token")
-    const payloadArea = document.getElementById("payload")
-    const tokenArea = document.getElementById("token")
-    const showAlert = document.getElementById("show-alert")
+    const formValidateToken = document.getElementById("form-validate-token")
+    const payloadTextArea = document.getElementById("payload")
+    const tokenTextArea = document.getElementById("token")
+    const showAlertGeneratedToken = document.getElementById("show-alert-generate-token")
 
-    const formData = new FormData(formPayload)
-
-    formPayload.addEventListener("submit", async(e) => {
-      e.preventDefault()
-      const response = await fetch("generateToken.php", {
+    async function handleUrlSearch(fetchUrl, formElement) {
+      const formData = new FormData(formElement)
+      const response = await fetch(fetchUrl, {
         method: "POST",
         body: formData
       })
-      const responseJson = await response.json()
-      const { payload, token } = responseJson
+      return await response.json()
+    }
+
+    function handleSubmitForm(fetchUrl, formElement, alertElement) {
+      formElement.addEventListener("submit", async(e) => {
+        e.preventDefault()  
+        const { payload, token } = await handleUrlSearch(fetchUrl, formElement)  
+        payloadTextArea.value = JSON.stringify(payload, null, 2)
+        tokenTextArea.value = token
+        alertElement.classList.replace("d-none", "d-flex")
+      })
+    }
+
+    function sendFormGenerateToken() {
+      handleSubmitForm("generateToken.php", formPayload, showAlertGeneratedToken) 
+    }
+    sendFormGenerateToken()
+
+    function sendFormValidateToken() {
+      handleSubmitForm("validateToken.php", formValidateToken)
+    }
+    sendFormValidateToken()
 
 
-      console.log(responseJson)
 
-      payloadArea.value = JSON.stringify(payload, null, 2)
-      tokenArea.value = token
-    })
   </script>
 </body>
 
