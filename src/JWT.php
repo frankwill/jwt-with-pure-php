@@ -66,15 +66,22 @@ class JWT
     $decode = json_decode(base64_decode($payload), true);
 
     $valid = hash_hmac("sha256", "$header.$payload", $key, true);
+    $valid = self::base64Encode($valid);
 
+    $response = array();
     if(count($arrayParts) != 3) {
-      return "Inválido";
+      $response["msg"] = "Token inválido";
+      return $response;
     } else if($decode["exp"] < time()) {
-      return "Expirado";
-    } else if ($signature == $valid) {
-      return "Permissão negada";
+      $response["msg"] = "Token expirado";
+      return $response;
+    } else if ($signature !== $valid) {
+      $response["msg"] = "Permissão negada";
+      return $response;
     } else {
-      return "$header.$payload.$signature";
+      $response["token"] = $header.$payload.$signature;
+      $response["msg"] = "Token válido";
+      return $response;
     }
   }
 }

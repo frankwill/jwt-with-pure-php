@@ -13,8 +13,10 @@
       height: 100%;
     }
 
-    textarea {
+    #payload,
+    #token {
       resize: none;
+      height: 120px;
     }
   </style>
 </head>
@@ -22,6 +24,19 @@
 <body class="d-flex align-items-center">
 
   <main class="w-100 m-auto">
+
+    <div class="row pt-4 justify-content-center align-items-center">
+      <div class="col-8">
+        <div class="alert alert-primary" role="alert">
+          <div class="d-flex align-items-center alert-heading">
+            <span class="material-icons-outlined me-2">error_outline</span>
+            <h4 class="alert-heading m-0">Palavra-chave</h4>
+          </div>
+          <p>A palavra-chave foi pré-definida no servidor como <code>my_secret_key</code>. Ao utilizar esta biblioteca, certifique-se de criar uma palavra-chave segura de sua escolha e, preferencialmente, armazene-a em <strong>variáveis de ambiente</strong>.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="row justify-content-center align-items-center">
       <div class="col-4 m-0">
         <form id="form-generate-token" method="POST">
@@ -35,15 +50,21 @@
           </div>
           <div class="mb-3">
             <label for="secret" class="form-label">Palavra-chave</label>
-            <input type="password" class="form-control" id="secret" name="secret" placeholder="Coloque uma palavra-chave bem segura" required>
+            <input type="text" class="form-control" id="secret" name="secret" placeholder="Defina uma palavra-chave segura" required value="my_secret_key">
           </div>
           <button type="submit" class="btn btn-primary">Criar Token</button>
         </form>
       </div>
 
       <div class="col-4 m-0">
-        <textarea id="payload" class="form-control text-secondary" rows="4" readonly></textarea>
-        <textarea id="token" class="form-control text-secondary mt-3" rows="4" readonly></textarea>
+        <div class="form-floating">
+          <textarea id="payload" class="form-control text-secondary" readonly></textarea>
+          <label for="payload">Payload</label>
+        </div>
+        <div class="form-floating">
+          <textarea id="token" class="form-control text-secondary mt-3" readonly></textarea>
+          <label for="token">Token</label>
+        </div>
       </div>
     </div>
 
@@ -68,11 +89,20 @@
         <form id="form-validate-token" method="POST">
           <div class="mb-4">
             <label for="token" class="form-label">Token</label>
-            <input type="text" class="form-control" id="token" name="token" placeholder="Digite seu token" required>
+            <input type="text" class="form-control" id="token-validate" name="token" placeholder="Digite seu token" required>
           </div>
           <button type="submit" class="btn btn-primary">Validar Token</button>
         </form>
       </div>
+
+      <!-- <div id="show-alert-validate-token" class="row pt-4 justify-content-center align-items-center d-none">
+        <div class="col-8">
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span id="text-alert-validate"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+      </div> -->
 
     </div>
   </main>
@@ -86,6 +116,7 @@
     const payloadTextArea = document.getElementById("payload")
     const tokenTextArea = document.getElementById("token")
     const showAlertGeneratedToken = document.getElementById("show-alert-generate-token")
+    const showAlertValidateToken = document.getElementById("show-alert-validate-token")
 
     async function handleUrlSearch(fetchUrl, formElement) {
       const formData = new FormData(formElement)
@@ -97,27 +128,62 @@
     }
 
     function handleSubmitForm(fetchUrl, formElement, alertElement) {
-      formElement.addEventListener("submit", async(e) => {
-        e.preventDefault()  
-        const { payload, token } = await handleUrlSearch(fetchUrl, formElement)  
-        payloadTextArea.value = JSON.stringify(payload, null, 2)
-        tokenTextArea.value = token
-        alertElement.classList.replace("d-none", "d-flex")
+      formElement.addEventListener("submit", async (e) => {
+        e.preventDefault()
+        const { payload, token, msg } = await handleUrlSearch(fetchUrl, formElement)
+        if (fetchUrl === "generateToken.php") {
+          payloadTextArea.value = JSON.stringify(payload, null, 2)
+          tokenTextArea.value = token
+        }
+
+        let dynamicBGAlert
+        if(msg == "Token válido") {
+          dynamicBGAlert = 'alert-success'
+        } else {
+          dynamicBGAlert = 'alert-warning'
+        }
+
+        if (fetchUrl === "validateToken.php") {
+            const existingAlert = document.getElementById("show-alert-validate-token")
+            const btnCloseAlert = document.getElementById("btn-close-alert")
+
+            if (existingAlert) {
+                existingAlert.querySelector('span').textContent = msg
+                existingAlert.querySelector('.alert').className = `alert ${dynamicBGAlert} alert-dismissible fade show`;
+            } else {
+                const htmlAlert = `
+                <div id="show-alert-validate-token" class="row pt-4 justify-content-center align-items-center">
+                    <div class="col-12">
+                        <div class="alert ${dynamicBGAlert} alert-dismissible fade show" role="alert">
+                            <span>${msg}</span>
+                            <button id="btn-close-alert" type="button" class="btn-close"></button>
+                        </div>
+                    </div>
+                </div>`
+                formValidateToken.insertAdjacentHTML("afterend", htmlAlert)
+
+                document.getElementById("btn-close-alert").addEventListener("click", function() {
+                    document.getElementById("show-alert-validate-token").remove()
+                })
+            }
+        }
+
+
+        if (alertElement) {
+          alertElement.classList.replace("d-none", "d-flex")
+        }
       })
     }
 
     function sendFormGenerateToken() {
-      handleSubmitForm("generateToken.php", formPayload, showAlertGeneratedToken) 
+      handleSubmitForm("generateToken.php", formPayload, showAlertGeneratedToken)
     }
     sendFormGenerateToken()
 
     function sendFormValidateToken() {
-      handleSubmitForm("validateToken.php", formValidateToken)
+      handleSubmitForm("validateToken.php", formValidateToken, showAlertValidateToken)
     }
     sendFormValidateToken()
-
-
-
   </script>
 </body>
 
