@@ -31,8 +31,8 @@ class JWT
 
     $payloadDefault = [
       "iat" => time(),
-      // "exp" => time() + (24 * 60 * 60),
-      "exp" => time() + 10,
+      "exp" => time() + (60 * 60),
+      // "exp" => time() + 10,
     ];
     $payload = array_merge($payloadDefault, $payload);
     $payload = self::base64Encode(json_encode($payload));
